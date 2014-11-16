@@ -8,13 +8,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <ListView
-        android:id="@+id/lv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/controlpanel" >
-    </ListView>
-
     <LinearLayout
         android:id="@+id/controlpanel"
         android:layout_width="match_parent"
@@ -23,16 +16,17 @@
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/musicnametv"
+            android:id="@+id/mntv"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" 
-            android:text="欢迎使用"/>
-         <SeekBar
-                android:id="@+id/seekbar"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:thumb="@drawable/seek_thumb_normal">
-            </SeekBar>
+            android:layout_height="wrap_content"
+            android:text="欢迎使用" />
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:thumb="@drawable/seek_thumb_normal" >
+        </SeekBar>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -43,23 +37,27 @@
                 android:id="@+id/lastoneib"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:src="@drawable/lastsong"/>
+                android:src="@drawable/lastsong" />
 
             <ImageButton
                 android:id="@+id/play"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:src="@drawable/playmusic"
-                 />
+                android:src="@drawable/playmusic" />
 
             <ImageButton
-                android:id="@+id/nextsong"
+                android:id="@+id/nextoneib"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:src="@drawable/nextsong" />
-
-           
         </LinearLayout>
     </LinearLayout>
+
+    <ListView
+        android:id="@+id/lv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/controlpanel" >
+    </ListView>
 
 </RelativeLayout>
