@@ -39,6 +39,10 @@ public class SimpleMusicPlayerService extends Service {
 			state=STATE.PLAYING;
 		}
 	}
+	public void stop(){
+		mPlayer.reset();
+		state=STATE.IDLE;
+	}
 	
 	//SeekBar Refresh
 	public int getDuration(){

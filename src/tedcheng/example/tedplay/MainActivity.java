@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			smpService = ((SimpleMusicPlayerService.SMPlayerBinder) service)
 					.getService();
-			//restore current playing info
+			// restore current playing info
 			if (smpService.getState() == true) {
 				count = smpService.getCount();
 				mntv.setText(mDataList.get(count).get("name").toString());
@@ -68,6 +68,7 @@ public class MainActivity extends Activity {
 		int temp = 1;
 		// Acquire all the songs from sdcard
 		// findAll(Environment.getExternalStorageDirectory().toString(),list);
+		//findAll("/storage/sdcard1/Kugou", list);
 		findAll("/mnt/sdcard", list);
 		// sort out the songs
 		Collections.sort(list);
@@ -130,18 +131,21 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				count = position;
-				mntv.setText(mDataList.get(position).get("name").toString());
-				smpService.playOrPause(mDataList.get(position).get("path")
-						.toString(), true);
-				handler.post(r);
-				pib.setImageResource(R.drawable.stopmusic);
+				if (!mDataList.isEmpty()) {
+					count=position;
+					mntv.setText(mDataList.get(position).get("name").toString());
+					smpService.playOrPause(mDataList.get(position).get("path")
+							.toString(), true);
+					handler.post(r);
+					pib.setImageResource(R.drawable.stopmusic);
+				}
 			}
 		});
 		list.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
+					final int position, long id) {
 				AlertDialog.Builder builder = new Builder(MainActivity.this);
 				builder.setMessage("Do you want to delete this song?");
 
@@ -149,16 +153,27 @@ public class MainActivity extends Activity {
 						new DialogInterface.OnClickListener() {
 
 							@Override
-							public void onClick(DialogInterface dialog, int which) {
+							public void onClick(DialogInterface dialog,
+									int which) {
 								dialog.dismiss();
-								mDataList.remove(which+1);
-								adapter.notifyDataSetChanged();
+								if(!mDataList.isEmpty()){
+									if(position==count){
+										smpService.stop();
+										count=0;
+										handler.removeCallbacks(r);
+										pib.setImageResource(R.drawable.playmusic);
+										Toast.makeText(getBaseContext(), "reset", Toast.LENGTH_SHORT).show();
+									}
+									mDataList.remove(position);
+									adapter.notifyDataSetChanged();	
+								}
 							}
 						});
 				builder.setNegativeButton("Cancel",
 						new DialogInterface.OnClickListener() {
 							@Override
-							public void onClick(DialogInterface dialog, int which) {
+							public void onClick(DialogInterface dialog,
+									int which) {
 								dialog.dismiss();
 							}
 						});
@@ -176,40 +191,49 @@ public class MainActivity extends Activity {
 		pib.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				smpService.playOrPause(mDataList.get(count).get("path")
-						.toString(), false);
-				mntv.setText(mDataList.get(count).get("name").toString());
-				handler.post(r);
-				if (smpService.getState())
-					pib.setImageResource(R.drawable.stopmusic);
-				else
-					pib.setImageResource(R.drawable.playmusic);
+				if (!mDataList.isEmpty()) {
+					smpService.playOrPause(mDataList.get(count).get("path")
+							.toString(), false);
+					mntv.setText(mDataList.get(count).get("name").toString());
+					handler.post(r);
+					if (smpService.getState())
+						pib.setImageResource(R.drawable.stopmusic);
+					else
+						pib.setImageResource(R.drawable.playmusic);
+				}
+				else Toast.makeText(getBaseContext(), "没有可用音乐文件", Toast.LENGTH_SHORT).show();
 				// TODO: updateByStatus();
 			}
 		});
 		lsib.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (count != 0)
-					count--;
-				smpService.playOrPause(mDataList.get(count).get("path")
-						.toString(), true);
-				mntv.setText(mDataList.get(count).get("name").toString());
-				handler.post(r);
-				pib.setImageResource(R.drawable.stopmusic);
+				if (!mDataList.isEmpty()) {
+					if (count != 0)
+						count--;
+					smpService.playOrPause(mDataList.get(count).get("path")
+							.toString(), true);
+					mntv.setText(mDataList.get(count).get("name").toString());
+					handler.post(r);
+					pib.setImageResource(R.drawable.stopmusic);
+				}
+				else Toast.makeText(getBaseContext(), "没有可用音乐文件", Toast.LENGTH_SHORT).show();
 				// TODO: updateByStatus();
 			}
 		});
 		nsib.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (count != 0)
-					count++;
-				smpService.playOrPause(mDataList.get(count).get("path")
-						.toString(), true);
-				mntv.setText(mDataList.get(count).get("name").toString());
-				handler.post(r);
-				pib.setImageResource(R.drawable.stopmusic);
+				if (!mDataList.isEmpty()) {
+					if (count+1 < mDataList.size())
+						count++;
+					smpService.playOrPause(mDataList.get(count).get("path")
+							.toString(), true);
+					mntv.setText(mDataList.get(count).get("name").toString());
+					handler.post(r);
+					pib.setImageResource(R.drawable.stopmusic);
+				}
+				else Toast.makeText(getBaseContext(), "没有可用音乐文件", Toast.LENGTH_SHORT).show();
 				// TODO: updateByStatus();
 			}
 		});
@@ -218,14 +242,10 @@ public class MainActivity extends Activity {
 		seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
