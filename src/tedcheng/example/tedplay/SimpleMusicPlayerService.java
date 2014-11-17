@@ -10,8 +10,8 @@ import android.os.IBinder;
 
 public class SimpleMusicPlayerService extends Service {
 	MediaPlayer mPlayer = new MediaPlayer();
-
-	enum STATE {
+	int countbackup=0;
+	static enum STATE {
 		PLAYING, PAUSE, IDLE
 	};
 	STATE state=STATE.IDLE;
@@ -51,11 +51,17 @@ public class SimpleMusicPlayerService extends Service {
 			return 0;
 		return mPlayer.getCurrentPosition();
 	}
-	public STATE getState(){
-		return state;
+	public boolean getState(){
+		return mPlayer.isPlaying();
 	}
 	public void setCurrentPosition(float percentage){
 		mPlayer.seekTo((int)(mPlayer.getDuration()*percentage));
+	}
+	public void backupCount(int count){
+		countbackup=count;
+	}
+	public int getCount(){
+		return countbackup;
 	}
 	
 	//Bind service
@@ -78,6 +84,7 @@ public class SimpleMusicPlayerService extends Service {
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
+		mPlayer.release();
 		super.onDestroy();
 	}
 
