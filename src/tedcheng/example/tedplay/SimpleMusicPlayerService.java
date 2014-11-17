@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
-import android.widget.Toast;
 
 public class SimpleMusicPlayerService extends Service {
 	MediaPlayer mPlayer = new MediaPlayer();
@@ -18,13 +17,12 @@ public class SimpleMusicPlayerService extends Service {
 	STATE state=STATE.IDLE;
 	private final SMPlayerBinder binder = new SMPlayerBinder();
 
-	public void playOrPause(String file){
+	public void playOrPause(String file,boolean restart){
 		//Initial play
-		if(state==STATE.IDLE)
+		if(state==STATE.IDLE||restart)
 			try{
 				mPlayer.reset();
 				mPlayer.setDataSource(file);
-				Toast.makeText(getBaseContext(),"loading music" , Toast.LENGTH_LONG).show();
 				mPlayer.prepare();
 				mPlayer.start();
 				state=STATE.PLAYING;
@@ -41,7 +39,26 @@ public class SimpleMusicPlayerService extends Service {
 			state=STATE.PLAYING;
 		}
 	}
-
+	
+	//SeekBar Refresh
+	public int getDuration(){
+		if(state==STATE.IDLE)
+			return 0;
+		return mPlayer.getDuration();
+	}
+	public int getCurrentPosition(){
+		if(state==STATE.IDLE)
+			return 0;
+		return mPlayer.getCurrentPosition();
+	}
+	public STATE getState(){
+		return state;
+	}
+	public void setCurrentPosition(float percentage){
+		mPlayer.seekTo((int)percentage*mPlayer.getDuration());
+	}
+	
+	//Bind service
 	@Override
 	public IBinder onBind(Intent intent) {
 		return this.binder;
@@ -52,15 +69,9 @@ public class SimpleMusicPlayerService extends Service {
 			return SimpleMusicPlayerService.this;
 		}
 	}
-
+	
 	@Override
 	public void onCreate() {
-		try {
-			mPlayer.setDataSource("/storage/sdcard1/Kugou/");
-			mPlayer.prepare();
-		} catch (IOException e) {
-			// don't know what to do
-		}
 		super.onCreate();
 	}
 

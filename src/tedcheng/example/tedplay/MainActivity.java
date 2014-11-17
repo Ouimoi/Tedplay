@@ -8,13 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.view.Menu;
@@ -24,15 +21,19 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-	private SimpleMusicPlayerService smpService = null;
+	private SimpleMusicPlayerService smpService=null;
 	ImageButton lsib, nsib, pib;
 	TextView mntv;
+	Handler handler=new Handler();
+	SeekBar seekbar;
+	int count=0;
 	private List<Map<String,Object>> mDataList = new ArrayList<Map<String,Object>>();
 	
 	private ServiceConnection sc = new ServiceConnection() {
@@ -75,10 +76,19 @@ public class MainActivity extends Activity {
 					list.add(subFile);
 					}
 			}
-		else Toast.makeText(getBaseContext(), "sd¿¨¶ÁÈ¡Ê§°Ü", Toast.LENGTH_LONG).show();
+		else Toast.makeText(getBaseContext(), "sd¿¨¶ÁÈ¡Îª¿Õ", Toast.LENGTH_LONG).show();
 	}
-	
-	
+	//Update UI
+	Runnable r=new Runnable(){
+		
+		@Override
+		public void run() {
+			seekbar.setProgress(seekbar.getMax()*smpService.getCurrentPosition()/smpService.getDuration());
+			handler.postDelayed(r,1000);	
+		}
+		
+	};
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -86,8 +96,10 @@ public class MainActivity extends Activity {
 		lsib = (ImageButton) findViewById(R.id.lastoneib);
 		nsib = (ImageButton) findViewById(R.id.nextoneib);
 		pib = (ImageButton) findViewById(R.id.play);
-		mntv=(TextView)findViewById(R.id.mntv);
+		mntv=(TextView)findViewById(R.id.mntv);		
+		seekbar=(SeekBar)findViewById(R.id.seekbar);
 		generateListView();
+		
 		//use adapter inflate listview
 		SimpleAdapter adapter= new SimpleAdapter(this, mDataList,
 				R.layout.listitem,
@@ -100,9 +112,9 @@ public class MainActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
+				count=position;
 				mntv.setText(mDataList.get(position).get("name").toString());
-				//TODO:how to restart?
-				smpService.playOrPause(mDataList.get(position).get("path").toString());
+				smpService.playOrPause(mDataList.get(position).get("path").toString(),true);
 			}
 		//TODO:longclick	
 		});
@@ -112,26 +124,46 @@ public class MainActivity extends Activity {
 				SimpleMusicPlayerService.class);
 		startService(bindintent);
 		bindService(bindintent, sc, BIND_AUTO_CREATE);
-
+		
 		pib.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				smpService.playOrPause(mDataList.get(0).get("name").toString());
+				smpService.playOrPause(mDataList.get(count).get("path").toString(),false);
+				mntv.setText(mDataList.get(count).get("name").toString());
+				handler.post(r);
 				// TODO: updateByStatus();
 			}
 		});
-		pib.setOnClickListener(new OnClickListener() {
+		lsib.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				smpService.playOrPause(mDataList.get(0).get("name").toString());
+				if(count!=0)
+						count--;
+				smpService.playOrPause(mDataList.get(count).get("path").toString(),true);
+				mntv.setText(mDataList.get(count).get("name").toString());
+				handler.post(r);
 				// TODO: updateByStatus();
 			}
 		});
+		nsib.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(count!=0)
+					count++;
+				smpService.playOrPause(mDataList.get(count).get("path").toString(),true);
+				mntv.setText(mDataList.get(count).get("name").toString());
+				handler.post(r);
+				// TODO: updateByStatus();
+			}
+		});
+		//Sychronize seekbar
+		
 	}
 
 	@Override
 	protected void onDestroy() {
 		unbindService(sc);
+		handler.removeCallbacks(r);
 		super.onDestroy();
 	}
 
