@@ -68,8 +68,8 @@ public class MainActivity extends Activity {
 		int temp = 1;
 		// Acquire all the songs from sdcard
 		// findAll(Environment.getExternalStorageDirectory().toString(),list);
-		//findAll("/storage/sdcard1/Kugou", list);
-		findAll("/mnt/sdcard", list);
+		findAll("/storage/sdcard1/Kugou", list);
+		//findAll("/mnt/sdcard", list);
 		// sort out the songs
 		Collections.sort(list);
 		for (File file : list) {
@@ -91,7 +91,7 @@ public class MainActivity extends Activity {
 				}
 			}
 		else
-			Toast.makeText(getBaseContext(), "sd卡读取为空", Toast.LENGTH_LONG)
+			Toast.makeText(getBaseContext(), "No mp3 files found,check your sdcard", Toast.LENGTH_LONG)
 					.show();
 	}
 
@@ -162,7 +162,7 @@ public class MainActivity extends Activity {
 										count=0;
 										handler.removeCallbacks(r);
 										pib.setImageResource(R.drawable.playmusic);
-										Toast.makeText(getBaseContext(), "reset", Toast.LENGTH_SHORT).show();
+										Toast.makeText(getBaseContext(), "Song is deleted", Toast.LENGTH_SHORT).show();
 									}
 									mDataList.remove(position);
 									adapter.notifyDataSetChanged();	
@@ -201,7 +201,7 @@ public class MainActivity extends Activity {
 					else
 						pib.setImageResource(R.drawable.playmusic);
 				}
-				else Toast.makeText(getBaseContext(), "没有可用音乐文件", Toast.LENGTH_SHORT).show();
+				else Toast.makeText(getBaseContext(), "list is empty", Toast.LENGTH_SHORT).show();
 				// TODO: updateByStatus();
 			}
 		});
@@ -217,7 +217,7 @@ public class MainActivity extends Activity {
 					handler.post(r);
 					pib.setImageResource(R.drawable.stopmusic);
 				}
-				else Toast.makeText(getBaseContext(), "没有可用音乐文件", Toast.LENGTH_SHORT).show();
+				else Toast.makeText(getBaseContext(), "list is empty", Toast.LENGTH_SHORT).show();
 				// TODO: updateByStatus();
 			}
 		});
@@ -233,7 +233,7 @@ public class MainActivity extends Activity {
 					handler.post(r);
 					pib.setImageResource(R.drawable.stopmusic);
 				}
-				else Toast.makeText(getBaseContext(), "没有可用音乐文件", Toast.LENGTH_SHORT).show();
+				else Toast.makeText(getBaseContext(), "list is empty", Toast.LENGTH_SHORT).show();
 				// TODO: updateByStatus();
 			}
 		});
