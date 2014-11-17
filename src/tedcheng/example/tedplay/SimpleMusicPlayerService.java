@@ -55,7 +55,7 @@ public class SimpleMusicPlayerService extends Service {
 		return state;
 	}
 	public void setCurrentPosition(float percentage){
-		mPlayer.seekTo((int)percentage*mPlayer.getDuration());
+		mPlayer.seekTo((int)(mPlayer.getDuration()*percentage));
 	}
 	
 	//Bind service

@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -22,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -56,7 +59,7 @@ public class MainActivity extends Activity {
 		int temp = 1;
 		//Acquire all the songs from sdcard
 		//findAll(Environment.getExternalStorageDirectory().toString(),list);
-		findAll("/mnt/sdcard",list);
+		findAll("/storage/sdcard1/Kugou",list);
 		//sort out the songs
 		Collections.sort(list);
 		for(File file:list){
@@ -115,6 +118,7 @@ public class MainActivity extends Activity {
 				count=position;
 				mntv.setText(mDataList.get(position).get("name").toString());
 				smpService.playOrPause(mDataList.get(position).get("path").toString(),true);
+				handler.post(r);
 			}
 		//TODO:longclick	
 		});
@@ -157,7 +161,30 @@ public class MainActivity extends Activity {
 			}
 		});
 		//Sychronize seekbar
-		
+		seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				if(fromUser){
+					float temp=(float)progress/(float)seekbar.getMax();
+					smpService.setCurrentPosition(temp);
+					Toast.makeText(getBaseContext(), ""+progress+"%", Toast.LENGTH_SHORT).show();}
+				
+			}
+		});
 	}
 
 	@Override
@@ -206,5 +233,4 @@ public class MainActivity extends Activity {
 //		}
 
 	}
-
 }
