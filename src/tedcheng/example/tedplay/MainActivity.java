@@ -34,13 +34,20 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
+
+	// Music Player Parameters
 	private SimpleMusicPlayerService smpService = null;
+	final static int PLAY_OR_PAUSE = 0;
+	final static int NEXT_SONG = 1;
+	final static int LAST_SONG = 2;
+	int count;
+
+	// UI Related
+	private List<Map<String, Object>> mDataList = new ArrayList<Map<String, Object>>();
 	ImageView lsib, nsib, pib;
 	TextView mntv;
-	Handler handler = new Handler();
+	Handler seekbarUpdateHandler = new Handler();
 	SeekBar seekbar;
-	int count;
-	private List<Map<String, Object>> mDataList = new ArrayList<Map<String, Object>>();
 
 	private ServiceConnection sc = new ServiceConnection() {
 		@Override
@@ -56,12 +63,55 @@ public class MainActivity extends Activity {
 			if (smpService.getState() == true) {
 				count = smpService.getCount();
 				mntv.setText(mDataList.get(count).get("name").toString());
-				handler.post(r);
+				seekbarUpdateHandler.post(r);
 				pib.setImageResource(R.drawable.stopmusic);
 			}
 			// TODO: updateByStatus();
 		}
 	};
+
+	public void mplayer(int command) {
+		switch (command) {
+		case PLAY_OR_PAUSE:
+			if (!mDataList.isEmpty()) {
+				smpService.playOrPause(mDataList.get(count).get("path")
+						.toString(), false);
+				if (smpService.getState())
+					pib.setImageResource(R.drawable.stopmusic);
+				else
+					pib.setImageResource(R.drawable.playmusic);
+			} else
+				Toast.makeText(getBaseContext(), "list is empty",
+						Toast.LENGTH_SHORT).show();
+			break;
+		case LAST_SONG:
+			if (!mDataList.isEmpty()) {
+				if (count != 0)
+					count--;
+				smpService.playOrPause(mDataList.get(count).get("path")
+						.toString(), true);
+				pib.setImageResource(R.drawable.stopmusic);
+			} else
+				Toast.makeText(getBaseContext(), "list is empty",
+						Toast.LENGTH_SHORT).show();
+			break;
+		case NEXT_SONG:
+			if (!mDataList.isEmpty()) {
+				if (count + 1 < mDataList.size())
+					count++;
+				smpService.playOrPause(mDataList.get(count).get("path")
+						.toString(), true);
+				pib.setImageResource(R.drawable.stopmusic);
+			} else
+				Toast.makeText(getBaseContext(), "list is empty",
+						Toast.LENGTH_SHORT).show();
+			break;
+		}
+
+		mntv.setText(mDataList.get(count).get("name").toString());
+		seekbarUpdateHandler.post(r);
+
+	}
 
 	// Generate Music List
 	private void generateListView() {
@@ -69,8 +119,8 @@ public class MainActivity extends Activity {
 		int temp = 1;
 		// Acquire all the songs from sdcard
 		// findAll(Environment.getExternalStorageDirectory().toString(),list);
-		findAll("/storage/sdcard1/Kugou", list);
-		//findAll("/mnt/sdcard", list);
+		//findAll("/storage/sdcard1/Kugou", list);
+		 findAll("/mnt/sdcard", list);
 		// sort out the songs
 		Collections.sort(list);
 		for (File file : list) {
@@ -92,7 +142,8 @@ public class MainActivity extends Activity {
 				}
 			}
 		else
-			Toast.makeText(getBaseContext(), "No mp3 files found,check your sdcard", Toast.LENGTH_LONG)
+			Toast.makeText(getBaseContext(),
+					"No mp3 files found,check your sdcard", Toast.LENGTH_LONG)
 					.show();
 	}
 
@@ -101,10 +152,15 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void run() {
-			seekbar.setProgress(seekbar.getMax()
-					* smpService.getCurrentPosition()
-					/ smpService.getDuration());
-			handler.postDelayed(r, 1000);
+			float percentage= (float)smpService.getCurrentPosition()
+					/ (float)smpService.getDuration();
+			seekbar.setProgress((int) (seekbar.getMax()
+					*percentage));
+			if(percentage>0.99){
+				mplayer(NEXT_SONG);
+				seekbarUpdateHandler.removeCallbacks(r);
+			}
+			seekbarUpdateHandler.postDelayed(r, 1000);
 		}
 
 	};
@@ -133,12 +189,8 @@ public class MainActivity extends Activity {
 					int position, long id) {
 				count = position;
 				if (!mDataList.isEmpty()) {
-					count=position;
-					mntv.setText(mDataList.get(position).get("name").toString());
-					smpService.playOrPause(mDataList.get(position).get("path")
-							.toString(), true);
-					handler.post(r);
-					pib.setImageResource(R.drawable.stopmusic);
+					count = --position;
+					mplayer(NEXT_SONG);
 				}
 			}
 		});
@@ -157,16 +209,18 @@ public class MainActivity extends Activity {
 							public void onClick(DialogInterface dialog,
 									int which) {
 								dialog.dismiss();
-								if(!mDataList.isEmpty()){
-									if(position==count){
+								if (!mDataList.isEmpty()) {
+									if (position == count) {
 										smpService.stop();
-										count=0;
-										handler.removeCallbacks(r);
+										count = 0;
+										seekbarUpdateHandler.removeCallbacks(r);
 										pib.setImageResource(R.drawable.playmusic);
-										Toast.makeText(getBaseContext(), "Song is deleted", Toast.LENGTH_SHORT).show();
+										Toast.makeText(getBaseContext(),
+												"Song is deleted",
+												Toast.LENGTH_SHORT).show();
 									}
 									mDataList.remove(position);
-									adapter.notifyDataSetChanged();	
+									adapter.notifyDataSetChanged();
 								}
 							}
 						});
@@ -192,54 +246,23 @@ public class MainActivity extends Activity {
 		pib.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (!mDataList.isEmpty()) {
-					smpService.playOrPause(mDataList.get(count).get("path")
-							.toString(), false);
-					mntv.setText(mDataList.get(count).get("name").toString());
-					handler.post(r);
-					if (smpService.getState())
-						pib.setImageResource(R.drawable.stopmusic);
-					else
-						pib.setImageResource(R.drawable.playmusic);
-				}
-				else Toast.makeText(getBaseContext(), "list is empty", Toast.LENGTH_SHORT).show();
-				// TODO: updateByStatus();
+				mplayer(PLAY_OR_PAUSE);
 			}
 		});
 		lsib.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (!mDataList.isEmpty()) {
-					if (count != 0)
-						count--;
-					smpService.playOrPause(mDataList.get(count).get("path")
-							.toString(), true);
-					mntv.setText(mDataList.get(count).get("name").toString());
-					handler.post(r);
-					pib.setImageResource(R.drawable.stopmusic);
-				}
-				else Toast.makeText(getBaseContext(), "list is empty", Toast.LENGTH_SHORT).show();
-				// TODO: updateByStatus();
+				mplayer(LAST_SONG);
 			}
 		});
 		nsib.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (!mDataList.isEmpty()) {
-					if (count+1 < mDataList.size())
-						count++;
-					smpService.playOrPause(mDataList.get(count).get("path")
-							.toString(), true);
-					mntv.setText(mDataList.get(count).get("name").toString());
-					handler.post(r);
-					pib.setImageResource(R.drawable.stopmusic);
-				}
-				else Toast.makeText(getBaseContext(), "list is empty", Toast.LENGTH_SHORT).show();
-				// TODO: updateByStatus();
+				mplayer(NEXT_SONG);
 			}
 		});
 
-		// Sychronize seekbar
+		// Sychronize Seekbar
 		seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
@@ -268,7 +291,7 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		smpService.backupCount(count);
 		unbindService(sc);
-		handler.removeCallbacks(r);
+		seekbarUpdateHandler.removeCallbacks(r);
 		super.onDestroy();
 	}
 
