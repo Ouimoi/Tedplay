@@ -40,20 +40,20 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal" >
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/lastoneib"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:src="@drawable/lastsong" />
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/play"
                 android:layout_width="wrap_content"
                 android:layout_height="71dp"
                 android:layout_weight="0.21"
                 android:src="@drawable/playmusic" />
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/nextoneib"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"

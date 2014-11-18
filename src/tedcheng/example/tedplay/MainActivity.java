@@ -23,7 +23,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -34,7 +35,7 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	private SimpleMusicPlayerService smpService = null;
-	ImageButton lsib, nsib, pib;
+	ImageView lsib, nsib, pib;
 	TextView mntv;
 	Handler handler = new Handler();
 	SeekBar seekbar;
@@ -112,9 +113,9 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		lsib = (ImageButton) findViewById(R.id.lastoneib);
-		nsib = (ImageButton) findViewById(R.id.nextoneib);
-		pib = (ImageButton) findViewById(R.id.play);
+		lsib = (ImageView) findViewById(R.id.lastoneib);
+		nsib = (ImageView) findViewById(R.id.nextoneib);
+		pib = (ImageView) findViewById(R.id.play);
 		mntv = (TextView) findViewById(R.id.mntv);
 		seekbar = (SeekBar) findViewById(R.id.seekbar);
 		generateListView();
