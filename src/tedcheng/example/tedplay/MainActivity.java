@@ -71,46 +71,39 @@ public class MainActivity extends Activity {
 	};
 
 	public void mplayer(int command) {
-		switch (command) {
-		case PLAY_OR_PAUSE:
-			if (!mDataList.isEmpty()) {
+		if (!mDataList.isEmpty()) {
+			switch (command) {
+			case PLAY_OR_PAUSE:
 				smpService.playOrPause(mDataList.get(count).get("path")
 						.toString(), false);
 				if (smpService.getState())
 					pib.setImageResource(R.drawable.stopmusic);
 				else
 					pib.setImageResource(R.drawable.playmusic);
-			} else
-				Toast.makeText(getBaseContext(), "list is empty",
-						Toast.LENGTH_SHORT).show();
-			break;
-		case LAST_SONG:
-			if (!mDataList.isEmpty()) {
+
+				break;
+			case LAST_SONG:
 				if (count != 0)
 					count--;
 				smpService.playOrPause(mDataList.get(count).get("path")
 						.toString(), true);
 				pib.setImageResource(R.drawable.stopmusic);
-			} else
-				Toast.makeText(getBaseContext(), "list is empty",
-						Toast.LENGTH_SHORT).show();
-			break;
-		case NEXT_SONG:
-			if (!mDataList.isEmpty()) {
+
+				break;
+			case NEXT_SONG:
 				if (count + 1 < mDataList.size())
 					count++;
 				smpService.playOrPause(mDataList.get(count).get("path")
 						.toString(), true);
 				pib.setImageResource(R.drawable.stopmusic);
-			} else
-				Toast.makeText(getBaseContext(), "list is empty",
-						Toast.LENGTH_SHORT).show();
-			break;
-		}
 
-		mntv.setText(mDataList.get(count).get("name").toString());
-		seekbarUpdateHandler.post(r);
-
+				break;
+			}
+			mntv.setText(mDataList.get(count).get("name").toString());
+			seekbarUpdateHandler.post(r);
+		} else
+			Toast.makeText(getBaseContext(), "list is empty",
+					Toast.LENGTH_SHORT).show();
 	}
 
 	// Generate Music List
@@ -119,8 +112,8 @@ public class MainActivity extends Activity {
 		int temp = 1;
 		// Acquire all the songs from sdcard
 		// findAll(Environment.getExternalStorageDirectory().toString(),list);
-		//findAll("/storage/sdcard1/Kugou", list);
-		 findAll("/mnt/sdcard", list);
+		// findAll("/storage/sdcard1/Kugou", list);
+		findAll("/mnt/sdcard", list);
 		// sort out the songs
 		Collections.sort(list);
 		for (File file : list) {
@@ -152,11 +145,10 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void run() {
-			float percentage= (float)smpService.getCurrentPosition()
-					/ (float)smpService.getDuration();
-			seekbar.setProgress((int) (seekbar.getMax()
-					*percentage));
-			if(percentage>0.99){
+			float percentage = (float) smpService.getCurrentPosition()
+					/ (float) smpService.getDuration();
+			seekbar.setProgress((int) (seekbar.getMax() * percentage));
+			if (percentage > 0.99) {
 				mplayer(NEXT_SONG);
 				seekbarUpdateHandler.removeCallbacks(r);
 			}
